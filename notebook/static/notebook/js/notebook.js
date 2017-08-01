@@ -2562,7 +2562,7 @@ define([
         this.notebook_name = data.name;
         this.notebook_path = data.path;
         var trusted = true;
-        
+        window.da = data;
         // Set the codemirror mode from language_info metadata
         if (this.metadata.language_info !== undefined) {
             var langinfo = this.metadata.language_info;
@@ -2841,12 +2841,19 @@ define([
                 Trust : {
                     class : "btn-danger",
                     click : function () {
-                        nb.contents.trust(nb.notebook_path)
+                       var cells = nb.get_cells();
+                       for (var i = 0; i < cells.length; i++) {
+                           var cell = cells[i];
+                           if (cell.cell_type === 'code') {
+                               cell.output_area.trusted = true;
+                           } 
+                       }
+                       nb.contents.trust(nb.notebook_path)
                         .then(function(res) {
                             nb.events.trigger("trust_changed.Notebook", true);
-                        }, function(err) {
+                         }, function(err) {
                             console.log(err);
-                        });
+                       });
                     }
                 }
             }
@@ -2951,6 +2958,7 @@ define([
     Notebook.prototype.load_notebook_success = function (data) {
         var failed, msg;
         try {
+            window.nb = data;
             this.fromJSON(data);
         } catch (e) {
             failed = e;

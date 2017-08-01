@@ -419,6 +419,8 @@ class FileContentsManager(FileManagerMixin, ContentsManager):
         try:
             if model['type'] == 'notebook':
                 nb = nbformat.from_dict(model['content'])
+                # We need this check in case the notebook
+                # is trusted before save
                 if not self.notary.check_signature(nb):
                     self.check_and_sign(nb, path)
                 self._save_notebook(os_path, nb)
