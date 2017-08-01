@@ -420,9 +420,9 @@ class ContentsManager(LoggingConfigurable):
         """
         model = self.get(path)
         nb = model['content']
-        self.log.warning("Trusting notebook %s", path)
-        self.notary.mark_cells(nb, True)
-        self.save(model, path)
+        if not self.notary.check_signature(nb):
+            self.log.warning("Trusting notebook %s", path)
+            self.notary.sign(nb)
 
     def check_and_sign(self, nb, path=''):
         """Check for trusted cells, and sign the notebook.
@@ -454,9 +454,10 @@ class ContentsManager(LoggingConfigurable):
             The notebook's path (for logging)
         """
         trusted = self.notary.check_signature(nb)
-        if not trusted:
+        if not trusted:            
             self.log.warning("Notebook %s is not trusted", path)
         self.notary.mark_cells(nb, trusted)
+
 
     def should_list(self, name):
         """Should this file/directory name be displayed in a listing?"""

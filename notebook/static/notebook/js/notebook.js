@@ -2841,17 +2841,12 @@ define([
                 Trust : {
                     class : "btn-danger",
                     click : function () {
-                        var cells = nb.get_cells();
-                        for (var i = 0; i < cells.length; i++) {
-                            var cell = cells[i];
-                            if (cell.cell_type === 'code') {
-                                cell.output_area.trusted = true;
-                            }
-                        }
-                        nb.events.on('notebook_saved.Notebook', function () {
-                            window.location.reload();
+                        nb.contents.trust(nb.notebook_path)
+                        .then(function(res) {
+                            nb.events.trigger("trust_changed.Notebook", true);
+                        }, function(err) {
+                            console.log(err);
                         });
-                        nb.save_notebook();
                     }
                 }
             }

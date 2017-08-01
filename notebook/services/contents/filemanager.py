@@ -341,7 +341,8 @@ class FileContentsManager(FileManagerMixin, ContentsManager):
         if content:
             os_path = self._get_os_path(path)
             nb = self._read_notebook(os_path, as_version=4)
-            self.mark_trusted_cells(nb, path)
+            if not self.notary.check_signature(nb):
+                self.mark_trusted_cells(nb, path)
             model['content'] = nb
             model['format'] = 'json'
             self.validate_notebook_model(model)
@@ -418,7 +419,8 @@ class FileContentsManager(FileManagerMixin, ContentsManager):
         try:
             if model['type'] == 'notebook':
                 nb = nbformat.from_dict(model['content'])
-                self.check_and_sign(nb, path)
+                if not self.notary.check_signature(nb):
+                    self.check_and_sign(nb, path)
                 self._save_notebook(os_path, nb)
                 # One checkpoint should always exist for notebooks.
                 if not self.checkpoints.list_checkpoints(path):
