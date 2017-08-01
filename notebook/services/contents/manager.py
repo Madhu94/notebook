@@ -454,7 +454,6 @@ class ContentsManager(LoggingConfigurable):
         """
         trusted = self.notary.check_signature(nb)
         if not trusted:
-            self.log.warning(self.notary.compute_signature(nb))
             self.log.warning("Notebook %s is not trusted", path)
         self.notary.mark_cells(nb, trusted)
 

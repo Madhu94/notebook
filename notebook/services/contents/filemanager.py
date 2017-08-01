@@ -341,8 +341,7 @@ class FileContentsManager(FileManagerMixin, ContentsManager):
         if content:
             os_path = self._get_os_path(path)
             nb = self._read_notebook(os_path, as_version=4)
-            if not self.notary.check_signature(nb):
-                self.mark_trusted_cells(nb, path)
+            self.mark_trusted_cells(nb, path)
             model['content'] = nb
             model['format'] = 'json'
             self.validate_notebook_model(model)
