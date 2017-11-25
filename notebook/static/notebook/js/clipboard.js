@@ -37,7 +37,8 @@ function load_json(clipboard) {
 function copy(event) {
   if ((Jupyter.notebook.mode !== 'command') ||
         // window.getSelection checks if text is selected, e.g. in output
-        !window.getSelection().isCollapsed) {
+        !window.getSelection().isCollapsed ||
+        event.target.id !== "notebook-copy-div") {
     return;
   }
   var selecn = Jupyter.notebook.get_selected_cells().map(
@@ -139,8 +140,30 @@ function setup_paste_dialog() {
   Jupyter.keyboard_manager.command_shortcuts.add_shortcut('Cmdtrl-V', full_action_name);
 }
 
+function handleKeyDown(e) {
+  if(!window.getSelection().isCollapsed) {
+    return;
+  }
+  var d = document.createElement('textarea');
+  d.id = "notebook-copy-div";
+  d.style.position = 'absolute';
+  d.style.left = '-9999px';
+  d.style.top = (window.pageYOffset || document.documentElement.scrollTop) + 'px';
+  d.value = 'placeholder text';
+  document.body.appendChild(d);
+  d.select();
+  d.focus();
+  setTimeout(function() {
+    d.remove();
+  }, 2000);
+  document.execCommand('copy');
+}
+
 // Set clipboard event listeners on the document.
 return {setup_clipboard_events: function() {
+  var full_action_name = Jupyter.actions.register(handleKeyDown, 'scope-copy', 'system-clipboard');
+  Jupyter.keyboard_manager.command_shortcuts.add_shortcut('Cmdtrl-C', full_action_name);
+
   document.addEventListener('copy', notebookOnlyEvent(copy));
   if (needs_text_box_for_paste_event()) {
     setup_paste_dialog();
