@@ -37,7 +37,9 @@ function load_json(clipboard) {
 function copy(event) {
   if ((Jupyter.notebook.mode !== 'command') ||
         // window.getSelection checks if text is selected, e.g. in output
-        !window.getSelection().isCollapsed) {
+        !window.getSelection().isCollapsed ||
+        // Allow extensions/custom widgets to copy to clipboard
+        window.getSelection().toString() !== "") {
     return;
   }
   var selecn = Jupyter.notebook.get_selected_cells().map(
